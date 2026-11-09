@@ -7,6 +7,8 @@ try{
   const probe=await fetch(origin+'/api/state',{signal:AbortSignal.timeout(15000),redirect:'manual'});
   if(probe.status!==401)throw Error('Сначала опубликуй приложение. /api/state без авторизации должен возвращать 401. Проверь Deployment Protection.');
   const error=await probe.json();if(!error.error?.includes('Telegram'))throw Error('По адресу APP_URL не обнаружен API приложения.');
+  const hookProbe=await fetch(origin+'/api/telegram',{method:'POST',headers:{'Content-Type':'application/json','X-Telegram-Bot-Api-Secret-Token':process.env.TELEGRAM_WEBHOOK_SECRET},body:'{}',signal:AbortSignal.timeout(15000),redirect:'manual'});
+  if(hookProbe.status!==400)throw Error('Проверь TELEGRAM_WEBHOOK_SECRET в Vercel: он должен совпадать с локальным значением. Затем выполни Redeploy.');
   const me=await telegram('getMe',{});
   const info=await telegram('getWebhookInfo',{});
   if(info.url&&info.url!==origin+'/api/telegram'&&!process.argv.includes('--replace'))throw Error('У бота уже другой webhook. Для осознанной замены добавь --replace.');
