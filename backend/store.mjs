@@ -3,7 +3,7 @@ export const empty=()=>({profile:null,history:{},revision:'0'});
 export function prefix(){return process.env.REDIS_PREFIX||'fortitudo-prod';}
 export const queue=()=>prefix()+':due';
 export async function redis(...command){
-  const url=process.env.UPSTASH_REDIS_REST_URL,token=process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url=process.env.UPSTASH_REDIS_REST_URL||process.env.KV_REST_API_URL,token=process.env.UPSTASH_REDIS_REST_TOKEN||process.env.KV_REST_API_TOKEN;
   if(!url?.startsWith('https://')||!token)throw Error('Database not configured');
   const r=await fetch(url,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(command),signal:AbortSignal.timeout(8000)});
   if(!r.ok)throw Error('Database unavailable');const data=await r.json();if(data.error)throw Error('Database command failed');return data.result;
